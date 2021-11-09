@@ -1,0 +1,8 @@
+<Launch><Group><include file="$(find PACKAGE)/PATH/0Product.launch" /><include file="$(find PACKAGE)/PATH/1Product.launch" /><include file="$(find PACKAGE)/PATH/2Product.launch" /><include file="$(find PACKAGE)/PATH/3Product.launch" /><include file="$(find PACKAGE)/PATH/4Product.launch" /><include file="$(find PACKAGE)/PATH/5Product.launch" /><include file="$(find PACKAGE)/PATH/6Product.launch" /></Group><Group><include file="$(find PACKAGE)/PATH/0Process.launch" /><include file="$(find PACKAGE)/PATH/1Process.launch" /><include file="$(find PACKAGE)/PATH/2Process.launch" /><include file="$(find PACKAGE)/PATH/3Process.launch" /></Group><include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="world_name" value="$(find gazebo_worlds)/worlds/factory_floor.sdf" />
+        <arg name="paused" value="false" />
+        <arg name="use_sim_time" value="true" />
+        <arg name="gui" value="true" />
+        <arg name="headless" value="false" />
+        <arg name="debug" value="false" />
+</include></Launch>
