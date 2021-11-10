@@ -1,8 +1,9 @@
 import xml.etree.cElementTree as ET
+import random
 
 arrayOfProd = []
 arrayOfProc = []
-
+arrayOfBricks = ["Vermillion", "Burlywood", "Amaranth", "Green", "Red", "Blue", "WilliRed"]
 
 class Swarm:
     def __init__(self, productBot, processBot):
@@ -13,10 +14,10 @@ class Swarm:
 def CreateProductBot(productBot):
     print("You have chosen", productBot, "product bots")
     for i in range(productBot):
-        arrayOfProd.append("Product Bot"+ str(i))
+        arrayOfProd.append("Product_Bot"+ str(i))
     print("This is the list of product bots:", arrayOfProd, '\n')
     for i in range(productBot):
-        tree = ET.parse('GazeboBotLaunch.xml')
+        tree = ET.parse("GazeboBotLaunch.xml")
         root = tree.getroot()
 
         oldName = root.find("./arg[@name='x']")
@@ -60,10 +61,10 @@ def CreateProcessBot(processBot):
 
     print("Now", processBot, "process bots are created")
     for i in range(processBot):
-        arrayOfProc.append("Process Bot"+ str(i))
+        arrayOfProc.append("Process_Bot"+ str(i))
     print("This is the list of process bots:", arrayOfProc, '\n')
     for i in range(processBot):
-        tree = ET.parse('GazeboBotLaunch.xml')
+        tree = ET.parse("GazeboBotLaunch.xml")
         root = tree.getroot()
 
         oldName = root.find("./arg[@name='x']")
@@ -91,7 +92,7 @@ def CreateProcessBot(processBot):
         paramCommandOld.attrib["command"] = paramCommandNew
 
         oldPosX = root.find("./arg[@default='p']")
-        newPosX = '1.0'
+        newPosX = '0.5'
         oldPosX.attrib["default"] = newPosX
 
         oldPosY = root.find("./arg[@default='q']")
@@ -104,11 +105,11 @@ def CreateProcessBot(processBot):
 
 
 def MakeBotLaunch():
-    root = ET.Element("Launch")
-    group = ET.SubElement(root,"Group")
+    root = ET.Element("launch")
+    group = ET.SubElement(root,"group")
     for i in range(len(arrayOfProd)):
         ET.SubElement(group, 'include', file='$(find PACKAGE)/PATH/'+str(i)+'Product.launch')
-    group1 = ET.SubElement(root,"Group")
+    group1 = ET.SubElement(root,"group")
     for i in range(len(arrayOfProc)):
         ET.SubElement(group1, 'include', file='$(find PACKAGE)/PATH/'+str(i)+'Process.launch')
     includeFile = ET.fromstring('''
@@ -124,4 +125,12 @@ def MakeBotLaunch():
 
     tree = ET.ElementTree(root)
     tree.write("BotLaunch.launch")
+
+def Task():
+
+    for i in range(len(arrayOfProc)):
+        colour = random.choice(arrayOfBricks)
+        amount = random.choice(range(5,50))
+        #if amount < 5:
+
 
