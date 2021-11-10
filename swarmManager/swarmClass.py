@@ -1,43 +1,36 @@
 import xml.etree.cElementTree as ET
-import random
+import ArrayLists
 
-arrayOfProd = []
-arrayOfProc = []
-arrayOfBricks = ["Vermillion", "Burlywood", "Amaranth", "Green", "Red", "Blue", "WilliRed"]
 
-class Swarm:
-    def __init__(self, productBot, processBot):
-        self.productBot = productBot
-        self.processBot = processBot
 
 
 def CreateProductBot(productBot):
     print("You have chosen", productBot, "product bots")
     for i in range(productBot):
-        arrayOfProd.append("Product_Bot"+ str(i))
-    print("This is the list of product bots:", arrayOfProd, '\n')
+        ArrayLists.arrayOfProd.append("Product_Bot"+ str(i))
+    print("This is the list of product bots:", ArrayLists.arrayOfProd, '\n')
     for i in range(productBot):
         tree = ET.parse("GazeboBotLaunch.xml")
         root = tree.getroot()
 
         oldName = root.find("./arg[@name='x']")
-        newName = arrayOfProd[i]
+        newName = ArrayLists.arrayOfProd[i]
         oldName.attrib["name"] = newName
 
         oldName1 = root.find("./arg[@default='y']")
-        newName1 = arrayOfProd[i]
+        newName1 = ArrayLists.arrayOfProd[i]
         oldName1.attrib["default"] = newName1
 
         groupArgOld = root.find("./group[@ns ='z']")
-        groupArgNew = '$(arg ' + arrayOfProd[i] + ')'
+        groupArgNew = '$(arg ' + ArrayLists.arrayOfProd[i] + ')'
         groupArgOld.attrib["ns"] = groupArgNew
 
         paramValOld = root.find("./group/node/param[@value = 'z']")
-        paramValNew = '$(arg ' + arrayOfProd[i] + ')'
+        paramValNew = '$(arg ' + ArrayLists.arrayOfProd[i] + ')'
         paramValOld.attrib["value"] = paramValNew
 
         nodeArgsOld = root.find("./group/node[@args = 'u']")
-        nodeArgsNew = '-urdf -model $(arg ' + arrayOfProd[i] + ') -x $(arg x_pos) -y $(arg y_pos) -z $(arg z_pos) -Y $(arg yaw) -param robot_description'
+        nodeArgsNew = '-urdf -model $(arg ' + ArrayLists.arrayOfProd[i] + ') -x $(arg x_pos) -y $(arg y_pos) -z $(arg z_pos) -Y $(arg yaw) -param robot_description'
         nodeArgsOld.attrib["args"] = nodeArgsNew
 
         paramCommandOld = root.find("./group/param[@command ='j']")
@@ -61,30 +54,30 @@ def CreateProcessBot(processBot):
 
     print("Now", processBot, "process bots are created")
     for i in range(processBot):
-        arrayOfProc.append("Process_Bot"+ str(i))
-    print("This is the list of process bots:", arrayOfProc, '\n')
+        ArrayLists.arrayOfProc.append("Process_Bot"+ str(i))
+    print("This is the list of process bots:", ArrayLists.arrayOfProc, '\n')
     for i in range(processBot):
         tree = ET.parse("GazeboBotLaunch.xml")
         root = tree.getroot()
 
         oldName = root.find("./arg[@name='x']")
-        newName = arrayOfProc[i]
+        newName = ArrayLists.arrayOfProc[i]
         oldName.attrib["name"] = newName
 
         oldName1 = root.find("./arg[@default='y']")
-        newName1 = arrayOfProc[i]
+        newName1 = ArrayLists.arrayOfProc[i]
         oldName1.attrib["default"] = newName1
 
         groupArgOld = root.find("./group[@ns ='z']")
-        groupArgNew = '$(arg ' + arrayOfProc[i] + ')'
+        groupArgNew = '$(arg ' + ArrayLists.arrayOfProc[i] + ')'
         groupArgOld.attrib["ns"] = groupArgNew
 
         paramValOld = root.find("./group/node/param[@value = 'z']")
-        paramValNew = '$(arg ' + arrayOfProc[i] + ')'
+        paramValNew = '$(arg ' + ArrayLists.arrayOfProc[i] + ')'
         paramValOld.attrib["value"] = paramValNew
 
         nodeArgsOld = root.find("./group/node[@args = 'u']")
-        nodeArgsNew = '-urdf -model $(arg ' + arrayOfProc[i] + ') -x $(arg x_pos) -y $(arg y_pos) -z $(arg z_pos) -Y $(arg yaw) -param robot_description'
+        nodeArgsNew = '-urdf -model $(arg ' + ArrayLists.arrayOfProc[i] + ') -x $(arg x_pos) -y $(arg y_pos) -z $(arg z_pos) -Y $(arg yaw) -param robot_description'
         nodeArgsOld.attrib["args"] = nodeArgsNew
 
         paramCommandOld = root.find("./group/param[@command ='j']")
@@ -107,10 +100,10 @@ def CreateProcessBot(processBot):
 def MakeBotLaunch():
     root = ET.Element("launch")
     group = ET.SubElement(root,"group")
-    for i in range(len(arrayOfProd)):
+    for i in range(len(ArrayLists.arrayOfProd)):
         ET.SubElement(group, 'include', file='$(find PACKAGE)/PATH/'+str(i)+'Product.launch')
     group1 = ET.SubElement(root,"group")
-    for i in range(len(arrayOfProc)):
+    for i in range(len(ArrayLists.arrayOfProc)):
         ET.SubElement(group1, 'include', file='$(find PACKAGE)/PATH/'+str(i)+'Process.launch')
     includeFile = ET.fromstring('''
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
@@ -125,12 +118,4 @@ def MakeBotLaunch():
 
     tree = ET.ElementTree(root)
     tree.write("BotLaunch.launch")
-
-def Task():
-
-    for i in range(len(arrayOfProc)):
-        colour = random.choice(arrayOfBricks)
-        amount = random.choice(range(5,50))
-        #if amount < 5:
-
 
