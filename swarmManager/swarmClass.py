@@ -8,6 +8,7 @@ def CreateProductBot(productBot):
     print("You have chosen", productBot, "product bots")
     for i in range(productBot):
         ArrayLists.arrayOfProd.append("Product_Bot"+ str(i))
+        ArrayLists.arrayOfInv.append(0)
     print("This is the list of product bots:", ArrayLists.arrayOfProd, '\n')
     for i in range(productBot):
         tree = ET.parse("GazeboBotLaunch.xml")
