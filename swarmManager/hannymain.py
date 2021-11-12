@@ -1,6 +1,23 @@
 import random
 import tkinter as tk
 import math
+import ArrayLists
+import swarmClass
+import taskClass
+import threading
+
+
+swarmClass.CreateProductBot(3)
+
+swarmClass.CreateProcessBot(3)
+
+swarmClass.MakeBotLaunch()
+
+taskClass.AmountBricks()
+
+for i in range(len(ArrayLists.arrayOfProd)):
+    threading.Thread(target=taskClass.ProdBotEat, args=[i]).start()
+
 
 root = tk.Tk()
 
@@ -12,12 +29,12 @@ canvas.pack()
 frame = tk.Frame(root, bg='#04050f')
 frame.place(relwidth=1, relheight=1)
 
-bricks = \
-    ['Red', 'Blue', 'Green', 'Yellow']
+bricks = ArrayLists.arrayAvailableColor
+
 bags = \
     ['Small', 'Large']
-pickers = \
-    ['Johnny', 'Tonni']
+
+pickers = ArrayLists.arrayOfProd
 
 
 bagSample1 = [(5,'Blue')]
@@ -91,7 +108,7 @@ def moveBotinDir(direction, object, i):
 # Do the above
 def obstacleSafety(labels, object1, object2):
     object = object1 + object2
-
+    print(object)
     safetyDist = 25
 
     for i in range(len(object)):
@@ -115,12 +132,7 @@ def obstacleSafety(labels, object1, object2):
 def createProcedure(product):
     product.sort(reverse=True)
     totalBricks = 0
-    procedure = []
-    for i in range(len(product)):
-        for j in range(product[i][0]):
-            totalBricks += 1
-            procedure.append(product[i][1])
-    print(procedure)
+    procedure = ArrayLists.arrayOfInv
 
     if totalBricks >= 3:
         procedure.insert(0,'Large')
