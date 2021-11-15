@@ -1,0 +1,43 @@
+<launch>
+  <!-- Arguments -->
+  <!-- <arg name="model" default="$(env TURTLEBOT3_MODEL)" doc="model type [burger, waffle, waffle_pi]"/> -->
+  <arg name="model" default="waffle_pi" />
+  <param name="/use_sim_time" value="true"/>
+  <arg name="map_file" default="$(find turtlebot3_navigation)/maps/map.yaml"/>
+  <arg name="move_forward_only" default="false"/>
+  
+  <!-- Turtlebot3 -->
+  <!-- <include file="$(find turtlebot3_bringup)/launch/turtlebot3_remote.launch">
+    <arg name="model" value="$(arg model)" />
+  </include> -->
+
+  <!-- Run the map server -->
+  <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" >
+    <param name="frame_id" value="/map" />
+  </node>
+  
+ <!-- Properties of each robot      -->
+
+  <!-- AMCL      -->
+    <include file="$(find multiple_turtlebots_nav)/launch/amcl_robot1.launch" />
+    <include file="$(find multiple_turtlebots_nav)/launch/amcl_robot2.launch" />
+    <include file="$(find multiple_turtlebots_nav)/launch/amcl_robot3.launch" />
+
+  <!-- MOVE_BASE-->
+    <include file="$(find multiple_turtlebots_nav)/launch/move_base_1.launch">
+      <!-- <arg name="model" value="$(arg model)" /> -->
+      <arg name="move_forward_only" value="$(arg move_forward_only)"/>
+    </include>
+    <include file="$(find multiple_turtlebots_nav)/launch/move_base_2.launch">
+      <!-- <arg name="model" value="$(arg model)" /> -->
+      <arg name="move_forward_only" value="$(arg move_forward_only)"/>
+    </include>
+    <include file="$(find multiple_turtlebots_nav)/launch/move_base_3.launch">
+      <!-- <arg name="model" value="$(arg model)" /> -->
+      <arg name="move_forward_only" value="$(arg move_forward_only)"/>
+    </include>
+
+<!-- Launching Rviz      -->
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find ros_path_planning)/rviz/multi_nav.rviz" />
+
+</launch>
