@@ -2,7 +2,7 @@
 arrayOfProd = []
 arrayOfProc = []
 arrayOfInv = []
-arrayOfBricks = ["Vermillion", "Burlywood", "Amaranth", "SaddleBrown", "Red", "Blue", "WilliRed"]
+arrayOfBricks = ["Red", "Blue", "Yellow", "Brown", "Green", "Purple", "Orange"]
 arrayAvailableColor = []
 arrayAvailableBricks = []
 State = ["Not Occupied", "Not Occupied", "Not Occupied", "Not Occupied", "Not Occupied", "Not Occupied", "Not Occupied"]

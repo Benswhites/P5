@@ -36,7 +36,6 @@ bags = \
 
 pickers = ArrayLists.arrayOfProd
 
-
 bagSample1 = [(5,'Blue')]
 
 
@@ -108,7 +107,6 @@ def moveBotinDir(direction, object, i):
 # Do the above
 def obstacleSafety(labels, object1, object2):
     object = object1 + object2
-    print(object)
     safetyDist = 25
 
     for i in range(len(object)):
@@ -131,8 +129,16 @@ def obstacleSafety(labels, object1, object2):
 
 def createProcedure(product):
     product.sort(reverse=True)
-    totalBricks = 0
-    procedure = ArrayLists.arrayOfInv
+
+    arrays = ArrayLists.arrayAvailableColor + ArrayLists.arrayOfInv
+    procedure = []
+
+
+    for i in range(len(arrays)-3):
+        procedure.append(arrays[i][0])
+    print(procedure)
+
+    totalBricks = arrays[-3] + arrays[-2] + arrays[-1]
 
     if totalBricks >= 3:
         procedure.insert(0,'Large')
