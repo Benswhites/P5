@@ -4,27 +4,29 @@ import math
 import ArrayLists
 import swarmClass
 import taskClass
+import time as t
 import threading
 
+productBots = 20
+processBots = 7
 
-swarmClass.CreateProductBot(3)
+swarmClass.CreateProductBot(productBots)
 
-swarmClass.CreateProcessBot(3)
+swarmClass.CreateProcessBot(processBots)
 
-swarmClass.MakeBotLaunch()
+#swarmClass.MakeBotLaunch()
 
 taskClass.AmountBricks()
 
-for i in range(len(ArrayLists.arrayOfProd)):
-    threading.Thread(target=taskClass.ProdBotEat, args=[i]).start()
-
+widthBase = 1920
+heightBase = 1080
 
 root = tk.Tk()
 
 root.title('Fleet Visualizer')
-root.geometry('500x500')
+root.geometry('1920x1080')
 
-canvas = tk.Canvas(root, height=500, width=500)
+canvas = tk.Canvas(root, height=widthBase, width=heightBase)
 canvas.pack()
 frame = tk.Frame(root, bg='#04050f')
 frame.place(relwidth=1, relheight=1)
@@ -36,20 +38,26 @@ bags = \
 
 pickers = ArrayLists.arrayOfProd
 
-bagSample1 = [(5,'Blue')]
+
+bagSample1 = []
+for i in range(random.randint(1,processBots)):
+    bagSample1.append([(random.randint(1,6),ArrayLists.arrayAvailableColor[random.randint(0,processBots-1)])])
+
+print(bagSample1)
 
 
 # Spawn Deploy-Robot positions at random locations
 def spawnDeploy():
     for i in range(len(bricks)):
-        bricks[i] = [str(bricks[i]), round(random.uniform(100,400),1), round(random.uniform(100,400),1)]
+        bricks[i] = [str(bricks[i]), round(random.uniform(100,widthBase-100),1), round(random.uniform(100,heightBase-100),1)]
     for i in range(len(bags)):
-        bags[i] = [str(bags[i]), round(random.uniform(100, 400), 1), round(random.uniform(100, 400), 1)]
+        bags[i] = [str(bags[i]), round(random.uniform(100, widthBase-100), 1), round(random.uniform(100, heightBase-100), 1)]
     for i in range(len(pickers)):
-        pickers[i] = [str(pickers[i]), round(random.uniform(100, 400), 1), round(random.uniform(100, 400), 1)]
+        pickers[i] = [str(pickers[i]), round(random.uniform(100, widthBase-100), 1), round(random.uniform(100, heightBase-100), 1)]
 
 # Create Deploy-Robots and Picker-bots in view
 def positionDeploy(labels, bricks, bags, pickers):
+
     for i in range(len(bricks)):
         label = tk.Label(frame, bg=bricks[i][0])
         label.place(anchor='c', x=bricks[i][1], y=bricks[i][2], width=20, height=20)
@@ -70,7 +78,7 @@ def positionDeploy(labels, bricks, bags, pickers):
 # Create Deploy-Station for product delivery
 def crtDeployStation(labels):
     label = tk.Label(frame, bg='white', text='Deploy')
-    label.place(anchor='c', x=475, y=250, width=50, height=100)
+    label.place(anchor='c', x=widthBase-50, y=heightBase/2, width=100, height=400)
     labels.append(label)
     return labels
 
@@ -110,12 +118,12 @@ def obstacleSafety(labels, object1, object2):
     safetyDist = 25
 
     for i in range(len(object)):
-        X = round(object[i][1])
-        Y = round(object[i][2])
+        X = object[i][1]
+        Y = object[i][2]
 
         for j in range(len(object)):
             if j != i:
-                x = object[j][1] # X coordinate
+                x = object[j][1] # X coordinate could round
                 y = object[j][2] # Y coordinate
 
                 txt = "The robot is too close? {} . Color is {}"
@@ -128,17 +136,18 @@ def obstacleSafety(labels, object1, object2):
 
 
 def createProcedure(product):
-    product.sort(reverse=True)
+    product[0].sort(reverse=True)
 
-    arrays = ArrayLists.arrayAvailableColor + ArrayLists.arrayOfInv
     procedure = []
 
+    test = len(product)
+    test = list(product[0][0])[1]
 
-    for i in range(len(arrays)-3):
-        procedure.append(arrays[i][0])
-    print(procedure)
-
-    totalBricks = arrays[-3] + arrays[-2] + arrays[-1]
+    totalBricks = 0
+    for i in range(len(product)):
+        procedure.append(list(product[i][0])[1])
+        totalBricks += list(product[i][0])[0]
+    #print(str(procedure) + " " + str(totalBricks))
 
     if totalBricks >= 3:
         procedure.insert(0,'Large')
@@ -148,7 +157,7 @@ def createProcedure(product):
     return procedure
 
 def moveToGoal(robot, robotCoord, targetCoord):
-    k = 0.4
+    k = 3
     xDist = targetCoord[0] - robotCoord[robot][1]
     yDist = targetCoord[1] - robotCoord[robot][2]
 
@@ -160,7 +169,7 @@ def swarmPlacement(procedure, object):
     target = []
     for i in range(len(procedure)):
 
-        target.append((425-(i*50),250))
+        target.append((widthBase-125-(i*50),heightBase/2))
 
         search = str(procedure[i])
         j = 0
@@ -174,15 +183,16 @@ def swarmPlacement(procedure, object):
 
 
 def movePickerinDir(direction, object, i):
-    k = 0.6
-    object[i][1] += math.cos(math.radians(direction)) * k
-    object[i][2] += math.sin(math.radians(direction)) * k
+    k = 2
+    object[i][1] += round(math.cos(math.radians(direction)) * k,1)
+    object[i][2] += round(math.sin(math.radians(direction)) * k,1)
 
 def dirPicker(targetCoord, robotCoord):
-    xDist = targetCoord[0] - robotCoord[0]
-    yDist = targetCoord[1] - robotCoord[1]
+    xDist = round(targetCoord[0] - robotCoord[0], 1)
+    yDist = round(targetCoord[1] - robotCoord[1], 1)
 
-    dir = math.degrees(math.atan2(yDist, xDist))
+    dir = round(math.degrees(math.atan2(yDist, xDist)),2)
+
 
     return dir
 
@@ -219,30 +229,34 @@ print(bricks)
 
 
 # Waiting pos:
-x1 = 400
-y1 = 295
-x2 = 425
-y2 = 295
+x1 = widthBase-100
+y1 = heightBase/2 + 50
+
+k = 0
 
 while True:
     labels = []
 
     positionDeploy(labels, bricks, bags, pickers)
+
+
+
     crtDeployStation(labels)
 
     ## Obstacle / Safety Avoidance
     procedure = createProcedure(bagSample1)
 
-    swarmPlacement(procedure,obstacleSafety(labels,bricks,bags))
+    troels = obstacleSafety(labels,bricks,bags)
+    #k += 1
+    #print(k)
+
+    swarmPlacement(procedure,troels)
 
 
     pickerManagement(procedure)
-    movePicker(x1, y1, 0)
 
-    movePicker(x2, y2, 1)
-
-
-
+    for i in range(productBots):
+        movePicker(x1-(i*25), y1, i)
 
 
     root.update()
