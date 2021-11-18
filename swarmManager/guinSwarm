@@ -38,6 +38,7 @@ swarmClass.CreateProcessBot(processBots)
 #swarmClass.MakeBotLaunch()
 taskClass.AmountBricks()
 
+
 widthBase = 600
 heightBase = 300
 
@@ -100,8 +101,6 @@ bagSample1 = []
 #for i in range(random.randint(1,processBots)):
     #bagSample1.append([(random.randint(1,6),ArrayLists.arrayAvailableColor[i])])
 
-
-
 # Spawn Deploy-Robot positions at random locations
 def spawnDeploy():
     for i in range(len(bricks)):
@@ -126,11 +125,10 @@ def positionDeploy(labels, bricks, pickers):
 
     return labels
 
+deploy = [0,0,0,0]
+refill = [0,0,0,0]
 # Create Deploy-Station for product delivery and process refill
 def crtDeployStation(labels, orderstate):
-
-    deploy = [0,0,0,0]
-    refill = [0,0,0,0]
 
     label = tk.Label(frame, bg='white', text='Deploy', font=("Samsung Sharp Sans", 13, "bold"))
     label.place(anchor='c', x=widthBase - 50, y=heightBase / 2, width=100, height=400)
@@ -211,7 +209,7 @@ def checkDirection(targetCoord, robotCoord):
 
 # Move bot away in direction
 def moveBotinDir(direction, object, i):
-    k = 0.15
+    k = 0.5
     object[i][1] += math.cos(math.radians(direction)) * k
     object[i][2] += math.sin(math.radians(direction)) * k
 
@@ -264,10 +262,6 @@ def moveToGoal(robot, robotCoord, targetCoord):
     robotCoord[robot][1] += math.cos(math.radians(math.degrees(math.atan2(yDist, xDist)))) * k
     robotCoord[robot][2] += math.sin(math.radians(math.degrees(math.atan2(yDist, xDist)))) * k
 
-
-
-
-
 def swarmPlacement(procedure, object):
     target = []
     for i in range(len(procedure)):
@@ -306,17 +300,15 @@ def movePicker(x,y,i):
     yDist = y - pickers[i][2]
 
     #txt = "{} for Picker {} is in proximity"
-    if -1 <= xDist <= 1 and -1 <= yDist <= 1:
+    if -2 <= xDist <= 2 and -2 <= yDist <= 2:
         #print(txt.format("X and Y", i))
         return True
     else:
         return False
 
-
 def pickerManagement(procedure):
 
     return
-
 
 ### ABOVE
 
@@ -353,7 +345,6 @@ def goButton(orderType):
     button = tk.Button(guiFrame, text='Reset', command=lambda: reset(), bg='white', fg='black',
                        font=("Samsung Sharp Sans", 12, "bold"), bd=0)
     button.place(anchor='nw', x=100, y=250, width=90, height=20)
-
 
 def rndButton():
 
@@ -419,10 +410,9 @@ def createButtons():
         label.place(anchor='c', x=115, y=50+i*30, width=40, height=20)
         labels.append(label)
 
-        label = tk.Label(guiFrame, bg=brick[i][1])
+        label = tk.Label(guiFrame, bg=brick[i][1], text=str(inventory[i]))
         label.place(anchor='c', x=20, y=50+i*30, width=20, height=20)
         labels.append(label)
-
 
 ### BELOW
 
@@ -466,6 +456,98 @@ def getPosfromColor(color):
         j += 1
     return pos
 
+def cannopy(state,k):
+    angle = 0
+    l = 100
+
+    x = 1920 / 2
+    y = 1080 / 2
+    for i in range(processBots):
+
+        angle = i * (360/processBots)
+
+        x = 960 + math.cos(math.radians(angle))*l
+        y = 540 + math.sin(math.radians(angle))*l
+
+        target = [x,y]
+
+        moveToGoal(i, bricks,target)
+
+    l = 200
+    for i in range(productBots):
+
+        angle = i * (360/productBots) - k
+
+        x = 960 + math.cos(math.radians(angle))*l
+        y = 540 + math.sin(math.radians(angle))*l
+
+        target = [x,y]
+
+        movePicker(x, y, i)
+
+    k = k + 0.2
+    if k == 360:
+        k = 0
+    return k
+
+
+occupation = []
+for i in range(productBots):
+    occupation.append('Not Occupied')
+
+deployment = []
+for i in range(productBots):
+    deployment.append(['False', 0])
+
+
+
+def givePickerOrder(i):
+
+    if occupation[i] == 'Not Occupied':
+        global d
+        d = 0
+        global completion
+        completion = []
+        for p in range(len(orderList[i])):
+            completion.append('Not Complete')
+        occupation[i] = 'Occupied'
+
+
+
+    if completion[d] == 'Not Complete' and occupation[i] == 'Occupied':
+        x ,y = getPosfromColor(orderList[i][d][1])
+        if movePicker(x, y, i):
+            completion[d] = 'Complete'
+            if d+1 == len(orderList[i]):
+                occupation[i] = 'Not Occupied'
+                deployment[i][0] = 'True'
+                orderList.pop()
+            else:
+                d = d + 1
+    else:
+        return
+
+# Waiting pos:
+x1 = widthBase-200
+y1 = heightBase/2 + 50
+
+# Deploy pos:
+xDeploy = widthBase - 110
+yDeploy1 = heightBase / 2 - 325 / 2 + (325 / 3) * 0
+yDeploy2 = heightBase / 2 - 325 / 2 + (325 / 3) * 1
+yDeploy3 = heightBase / 2 - 325 / 2 + (325 / 3) * 2
+yDeploy4 = heightBase / 2 - 325 / 2 + (325 / 3) * 3
+
+def movePickerToDeploy(i):
+    if deploy[0] == 0:
+        deploy[0] = 1
+        global yP
+        yP = yDeploy1
+
+    if movePicker(xDeploy, yP, i) and deploy[0] == 1:
+        deployment[i][0] = 'False'
+        deploy[0] = 0
+
 
 spawnDeploy()
 print(bricks)
@@ -479,18 +561,13 @@ print(bricks)
 # 6. Products skal leveres til deploystation
 
 
-# Waiting pos:
-x1 = widthBase-200
-y1 = heightBase/2 + 50
 
-# Deploy pos:
-xDeploy = widthBase - 110
-yDeploy1 = heightBase / 2 - 325 / 2 + (325 / 3) * 0
-yDeploy2 = heightBase / 2 - 325 / 2 + (325 / 3) * 1
-yDeploy3 = heightBase / 2 - 325 / 2 + (325 / 3) * 2
-yDeploy4 = heightBase / 2 - 325 / 2 + (325 / 3) * 3
 
 k = 0
+state = 0
+wait = 1
+
+#orderList = [[[1, 'Green'], [1, 'Orange']]]
 
 while True:
 
@@ -507,14 +584,25 @@ while True:
 
     troels = obstacleSafety(labels,bricks)
 
-    swarmPlacement(procedure,troels)
+    #swarmPlacement(procedure,troels)
 
 
     pickerManagement(procedure)
 
-    for i in range(len(procedure)):
-        x, y = getPosfromColor(procedure[i])
-        movePicker(x, y, i)
+
+    ## WAITING STATE
+    if len(orderList) == 0:
+        k = cannopy(state, k)
+    else:
+        for i in range(len(orderList)):
+            givePickerOrder(i)
+
+    for i in range(productBots):
+        if deployment[i][0] == 'True':
+            movePickerToDeploy(i)
+
+
+    #for i in range(len(procedure)):
 
 
     root.update()
