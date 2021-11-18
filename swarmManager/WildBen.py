@@ -2,16 +2,19 @@ import swarmClass
 import taskClass
 import threading
 import ArrayLists
-import time
 
-swarmClass.CreateProductBot(3)
 
-swarmClass.CreateProcessBot(3)
+
+swarmClass.CreateProductBot(4)
+
+swarmClass.CreateProcessBot(7)
 
 swarmClass.MakeBotLaunch()
 
 taskClass.AmountBricks()
 
-for i in range(len(ArrayLists.arrayOfProd)):
-    threading.Thread(target=taskClass.ProdBotEat, args=[i]).start()
+taskClass.ModusOperandi()
 
+taskClass.ProdBotEat()
+
+taskClass.Refill()
