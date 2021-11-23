@@ -5,16 +5,18 @@ import ArrayLists
 
 
 
-swarmClass.CreateProductBot(4)
+swarmClass.CreateProductBot(2)
 
-swarmClass.CreateProcessBot(7)
+swarmClass.CreateProcessBot(2)
 
 swarmClass.MakeBotLaunch()
 
-taskClass.AmountBricks()
+#taskClass.WhatColor()
 
-taskClass.ModusOperandi()
+#while True:
+ #   taskClass.AmountBricks()
 
-taskClass.ProdBotEat()
+  #  taskClass.ModusOperandi()
 
-taskClass.Refill()
+   # taskClass.ProdBotEat()
+
