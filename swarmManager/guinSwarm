@@ -57,7 +57,11 @@ gui.attributes('-fullscreen', False)
 orderList = []
 
 ## ["Red", "Blue", "Yellow", "Brown", "Green", "Purple", "Orange"]
-brick = [[0, 'Red'], [0, 'Blue'], [0, 'Yellow'], [0, 'Brown'], [0, 'Green'], [0, 'Purple'], [0,'Orange']]
+inventory = ArrayLists.arrayAvailableBricks
+brick = [[0, 'Red'], [0, 'Blue'], [0, 'Yellow'], [0, 'Brown'], [0, 'Green'], [0, 'Cyan'], [0,'Orange']]
+
+#print(inventory)
+
 labels = []
 
 ## SETTING VARIABLES ##
@@ -93,8 +97,6 @@ bricks = ArrayLists.arrayAvailableColor
 pickers = ArrayLists.arrayOfProd
 
 object = bricks + pickers
-
-inventory = ArrayLists.arrayAvailableBricks
 
 bagSample1 = []
 
@@ -464,7 +466,7 @@ def cannopy(state,k):
     y = 1080 / 2
     for i in range(processBots):
 
-        angle = i * (360/processBots)
+        angle = i * (360/processBots) + k
 
         x = 960 + math.cos(math.radians(angle))*l
         y = 540 + math.sin(math.radians(angle))*l
@@ -518,12 +520,67 @@ def givePickerOrder(i):
         x ,y = getPosfromColor(orderList[i][d][1])
         if movePicker(x, y, i):
             completion[d] = 'Complete'
+            ind = brickIndex.index(orderList[i][d][1])
+            inventory[ind] -= orderList[i][d][0]
+
             if d+1 == len(orderList[i]):
-                occupation[i] = 'Not Occupied'
+
                 deployment[i][0] = 'True'
-                orderList.pop()
+                kVal = 1
+                for t in range(len(deployment)):
+                    if deployment[t][1] == 1:
+                        kVal += 1
+                    elif deployment[t][1] == 2:
+                        kVal += 1
+                    elif deployment[t][1] == 3:
+                        kVal += 1
+                    elif deployment[t][1] == 4:
+                        kVal += 1
+                deployment[i][1] = kVal
+                print(deployment[i][1])
+
             else:
                 d = d + 1
+
+
+    if deployment[i][0] == 'True' and occupation[i] == 'Occupied':
+        ## SELECT DEPLOY STATION HERE
+        xCoord = xDeploy
+        yCoord = yDeploy1
+
+        if deployment[i][1] == 1:
+            deploy[0] = 1
+            yCoord = yDeploy1
+            if movePicker(xCoord, yCoord, i):
+                orderList.pop()
+                occupation[i] = 'Not Occupied'
+                deployment[i][0] = 'False'
+                deploy[0] = 0
+        elif deployment[i][1] == 2:
+            deploy[1] = 1
+            yCoord = yDeploy2
+            if movePicker(xCoord, yCoord, i):
+                orderList.pop()
+                occupation[i] = 'Not Occupied'
+                deployment[i][0] = 'False'
+                deploy[1] = 0
+        elif deployment[i][1] == 3:
+            deploy[2] = 1
+            yCoord= yDeploy3
+            if movePicker(xCoord, yCoord, i):
+                orderList.pop()
+                occupation[i] = 'Not Occupied'
+                deployment[i][0] = 'False'
+                deploy[2] = 0
+        elif deployment[i][1] == 4:
+            deploy[3] = 1
+            yCoord = yDeploy4
+            if movePicker(xCoord, yCoord, i):
+                orderList.pop()
+                occupation[i] = 'Not Occupied'
+                deployment[i][0] = 'False'
+                deploy[3] = 0
+
     else:
         return
 
@@ -543,6 +600,9 @@ def movePickerToDeploy(i):
         deploy[0] = 1
         global yP
         yP = yDeploy1
+        global xP
+        xP = xDeploy
+        #movePicker(xDeploy, yP, i)
 
     if movePicker(xDeploy, yP, i) and deploy[0] == 1:
         deployment[i][0] = 'False'
@@ -561,6 +621,7 @@ print(bricks)
 # 6. Products skal leveres til deploystation
 
 
+brickIndex = ['Red', 'Blue', 'Yellow', 'Brown', 'Green', 'Cyan', 'Orange']
 
 
 k = 0
@@ -582,7 +643,8 @@ while True:
     ## Obstacle / Safety Avoidance
     procedure = createProcedure(orderList)
 
-    troels = obstacleSafety(labels,bricks)
+    troels = obstacleSafety(labels,bricks+pickers)
+    #tonny = obstacleSafety(labels,pickers)
 
     #swarmPlacement(procedure,troels)
 
@@ -597,10 +659,9 @@ while True:
         for i in range(len(orderList)):
             givePickerOrder(i)
 
-    for i in range(productBots):
-        if deployment[i][0] == 'True':
-            movePickerToDeploy(i)
-
+    search = 'Blue'
+    #print(ArrayLists.arrayAvailableColor)
+    print(brickIndex.index('Blue'))
 
     #for i in range(len(procedure)):
 
