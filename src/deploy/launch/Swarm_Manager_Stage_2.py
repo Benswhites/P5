@@ -33,14 +33,14 @@ def make_robot(x, y, robot): # Should be called move_robot.
     goal.target_pose.header.stamp = rospy.Time.now()
     goal.target_pose.pose.position.x = x
     goal.target_pose.pose.position.y = y
-    goal.target_pose.pose.orientation.w = 1.0 # Not just = w?
+    goal.target_pose.pose.orientation.w = 1.0 
 
     client.send_goal(goal)
     wait = client.wait_for_result()
     if not wait:
         rospy.logerr("Action server not available!")
         rospy.signal_shutdown("Action server not available!")
-        rospy.loginfo(client.get_result()) # This line is redundant. As such, it needs to be commented out.
+        rospy.loginfo(client.get_result())
 
     else:
         rospy.loginfo(client.get_result())
@@ -48,14 +48,14 @@ def make_robot(x, y, robot): # Should be called move_robot.
     return client.get_result
 
 def task_received(task, unit):
-    location = [0, 0] # Please explain. Is this simply (x,y)
+    location = [0, 0]
     job = len(task)
     while job > 0:
         for j in range(len(task)):
             for i in range(len(process_units)):
                 test = task[j][0] in process_units[i] # We need better name than "test".
                 if test == True and process_units[i][1] == "idle" and task[j][1] == "pending":
-                    location[0] = process_units[i][2] # This is not very general is it?
+                    location[0] = process_units[i][2] 
                     location[1] = process_units[i][3]
                     done = "no"
                     while done == "no":
@@ -67,8 +67,7 @@ def task_received(task, unit):
     return "idle"
 
 while len(tasks) > 0:
-    #for i in range(len(tasks)): # was process unit. oops haha.
-    for i in range(len(product_units)): # was process unit. oops haha. # Det er muligt at det er linjen over der virker.
+    for i in range(len(product_units)):
 
         if product_units[i][1] == "idle":
             product_units[i][1] = "active"
