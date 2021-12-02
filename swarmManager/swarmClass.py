@@ -1,6 +1,5 @@
 import xml.etree.cElementTree as ET
 import ArrayLists
-import re
 
 
 def CreateProductBot(productBot):
@@ -13,19 +12,19 @@ def CreateProductBot(productBot):
         tree = ET.parse("GazeboBotLaunch.xml")
         root = tree.getroot()
 
-        oldName = root.find("./arg[@value='Bot1']")
+        oldName = root.find("./include/arg[@value='Bot1']")
         newName = ArrayLists.arrayOfProd[i]
         oldName.attrib["value"] = newName
 
-        oldPosX = root.find("./arg[@value='x']")
+        oldPosX = root.find("./include/arg[@value='x']")
         newPosX = str(i)+'.0'
         oldPosX.attrib["value"] = newPosX
 
-        oldPosY = root.find("./arg[@value='y']")
+        oldPosY = root.find("./include/arg[@value='y']")
         newPosY = '1.0'
         oldPosY.attrib["value"] = newPosY
 
-        oldModel = root.find("./arg[@value='robot']")
+        oldModel = root.find("./include/arg[@value='robot']")
         newModel = 'burger'
         oldModel.attrib["value"] = newModel
 
@@ -44,19 +43,19 @@ def CreateProcessBot(processBot):
         tree = ET.parse("GazeboBotLaunch.xml")
         root = tree.getroot()
 
-        oldName = root.find("./arg[@value='Bot1']")
+        oldName = root.find("./include/arg[@value='Bot1']")
         newName = ArrayLists.arrayOfProd[i]
         oldName.attrib["value"] = newName
 
-        oldPosX = root.find("./arg[@value='x']")
-        newPosX = '0.5'
+        oldPosX = root.find("./include/arg[@value='x']")
+        newPosX = '5.0'
         oldPosX.attrib["value"] = newPosX
 
-        oldPosY = root.find("./arg[@value='y']")
+        oldPosY = root.find("./include/arg[@value='y']")
         newPosY = str(i)+'.0'
         oldPosY.attrib["value"] = newPosY
 
-        oldModel = root.find("./arg[@value='robot']")
+        oldModel = root.find("./include/arg[@value='robot']")
         newModel = 'waffle'
         oldModel.attrib["value"] = newModel
 
@@ -80,7 +79,7 @@ def MakeBotLaunch():
         <arg name="world_file"  default="$(find deploy)/worlds/factory_floor.sdf"/>
         <arg name="open_rviz"   default="true"/>
         <arg name="open_gazebo" default="true"/>
-    </group> \n
+    </group>
     ''')
     includeFile2 = ET.fromstring('''
     <!-- Map server -->

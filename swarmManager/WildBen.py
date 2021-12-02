@@ -1,7 +1,6 @@
 import swarmClass
 import taskClass
-import threading
-import ArrayLists
+
 
 
 
@@ -11,12 +10,12 @@ swarmClass.CreateProcessBot(2)
 
 swarmClass.MakeBotLaunch()
 
-#taskClass.WhatColor()
+taskClass.WhatColor()
 
-#while True:
- #   taskClass.AmountBricks()
 
-  #  taskClass.ModusOperandi()
+taskClass.AmountBricks()
 
-   # taskClass.ProdBotEat()
+taskClass.ModusOperandi()
+
+taskClass.ProdBotEat()
 

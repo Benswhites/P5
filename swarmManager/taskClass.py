@@ -40,12 +40,14 @@ def ProdBotEat():
     for i in range(len(ArrayLists.arrayOfProd)):
         print(ArrayLists.arrayOfProd[i], "has started")
         time.sleep(1)
+        bag = ""
         job = len(ArrayLists.arrayOfProc)
         order = ["Not Complete", "Not Complete", "Not Complete", "Not Complete", "Not Complete", "Not Complete", "Not Complete"]
         while job != 0:
-            for j in range(len(ArrayLists.arrayOfBricks)):
+            for j in range(len(ArrayLists.arrayOfProc)):
                 if ArrayLists.ModusOperandiArray[i][1+j*2] > 0 and ArrayLists.State[j] == "Not Occupied" and order[j] == "Not Complete":
                     ArrayLists.State[j] = "Occupied"
+
                     ArrayLists.arrayOfInv[i] += ArrayLists.ModusOperandiArray[i][1+j*2]
                     newAmountAfterBrickGone = ArrayLists.arrayAvailableBricks[i] - ArrayLists.ModusOperandiArray[i][1+j*2]
                     ArrayLists.arrayAvailableBricks[i] = newAmountAfterBrickGone
@@ -53,7 +55,11 @@ def ProdBotEat():
                     ArrayLists.State[j] = "Not Occupied"
                     order[j] = "Complete"
                     Refill(j)
-        print(ArrayLists.arrayOfProd[i], "going to station and dropping of bag with", ArrayLists.arrayOfInv[i])
+        if ArrayLists.arrayOfInv[i] < 3:
+            bag = "small"
+        else:
+            bag = "large"
+        print(ArrayLists.arrayOfProd[i], "going to station and dropping of a", str(bag), "bag with", ArrayLists.arrayOfInv[i])
         #Add movement to station
         time.sleep(5)
         ArrayLists.arrayOfInv[i] = 0
