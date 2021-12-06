@@ -510,7 +510,7 @@ pick = [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1]
 
 
 def givePickerOrder(i, k):
-    ## Check if Picker is occupied. If not, move on
+    # Check if Picker is occupied. If not, move on
 
     completion = ["Complete", "Complete", "Complete", "Complete", "Complete", "Complete", "Complete"]
     if i in completedList:
@@ -523,9 +523,6 @@ def givePickerOrder(i, k):
     if occupation[i] == 'Not Occupied':
         occupation[i] = 'Occupied'
         pick[i] = i
-
-
-    #print(deployment)
 
 
 
