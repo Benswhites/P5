@@ -39,7 +39,7 @@ swarmClass.CreateProcessBot(processBots)
 taskClass.AmountBricks()
 
 
-widthBase = 600
+widthBase = 800
 heightBase = 300
 
 gui = tk.Tk()
@@ -58,6 +58,8 @@ orderList = []
 
 ## ["Red", "Blue", "Yellow", "Brown", "Green", "Purple", "Orange"]
 inventory = ArrayLists.arrayAvailableBricks
+
+brickColor = ["Red", "Blue", "Yellow", "Brown", "Green", "Cyan", "Orange"]
 brick = [[0, 'Red'], [0, 'Blue'], [0, 'Yellow'], [0, 'Brown'], [0, 'Green'], [0, 'Cyan'], [0,'Orange']]
 
 #print(inventory)
@@ -74,6 +76,9 @@ green = '#20c94e'
 
 orderWindow = tk.Text(guiFrame, exportselection=0, insertofftime=0, font=("Samsung Sharp Sans", 8, "bold"))
 orderWindow.place(anchor='nw', x=210, y=40, width=380, height=230)
+
+orderStateWindow = tk.Text(guiFrame, exportselection=0, insertofftime=0, font=("Samsung Sharp Sans", 8, "bold"))
+orderStateWindow.place(anchor='nw', x=610, y=85, width=180, height=185)
 
 
 
@@ -115,7 +120,7 @@ def spawnDeploy():
 def positionDeploy(labels, bricks, pickers):
 
     for i in range(len(bricks)):
-        label = tk.Label(frame, bg=bricks[i][0], text=str(inventory[i]))
+        label = tk.Label(frame, bg=bricks[i][0])
         label.place(anchor='c', x=round(bricks[i][1]), y=round(bricks[i][2]), width=20, height=20)
         labels.append(label)
 
@@ -186,7 +191,7 @@ def crtDeployStation(labels, orderstate):
     return labels
 
 # Calculate distance between bots
-def checkDistance(p, p1):
+def checkDistance(p, p1, distance):
 
     x1 = p[0]
     y1 = p[1]
@@ -195,7 +200,7 @@ def checkDistance(p, p1):
 
     result = round((((x2 - x1) ** 2) + ((y2 - y1) ** 2)) ** 0.5)
 
-    if result <= 100:
+    if result <= distance:
         return True
     else:
         return False
@@ -211,14 +216,13 @@ def checkDirection(targetCoord, robotCoord):
 
 # Move bot away in direction
 def moveBotinDir(direction, object, i):
-    k = 0.5
+    k = 2
     object[i][1] += math.cos(math.radians(direction)) * k
     object[i][2] += math.sin(math.radians(direction)) * k
 
 # Do the above
-def obstacleSafety(labels, object):
+def obstacleSafety(labels, object, distance):
     object
-    safetyDist = 25
 
     for i in range(len(object)):
         X = object[i][1]
@@ -230,7 +234,7 @@ def obstacleSafety(labels, object):
                 y = object[j][2] # Y coordinate
 
                 txt = "The robot is too close? {} . Color is {}"
-                result = checkDistance((x,y), (X,Y))
+                result = checkDistance((x,y), (X,Y), distance)
                 if result == True:
                     #print(txt.format(result, str(object[j][0])))
                     moveBotinDir(checkDirection((X,Y),(x,y)), object, i)
@@ -261,8 +265,13 @@ def moveToGoal(robot, robotCoord, targetCoord):
     xDist = targetCoord[0] - robotCoord[robot][1]
     yDist = targetCoord[1] - robotCoord[robot][2]
 
-    robotCoord[robot][1] += math.cos(math.radians(math.degrees(math.atan2(yDist, xDist)))) * k
-    robotCoord[robot][2] += math.sin(math.radians(math.degrees(math.atan2(yDist, xDist)))) * k
+    if -4 <= xDist <= 4 and -4 <= yDist <= 4:
+        #print(txt.format("X and Y", i))
+        return True
+    else:
+        robotCoord[robot][1] += math.cos(math.radians(math.degrees(math.atan2(yDist, xDist)))) * k
+        robotCoord[robot][2] += math.sin(math.radians(math.degrees(math.atan2(yDist, xDist)))) * k
+
 
 def swarmPlacement(procedure, object):
     target = []
@@ -296,8 +305,6 @@ def dirPicker(targetCoord, robotCoord):
     return dir
 
 def movePicker(x,y,i):
-    movePickerinDir(dirPicker((x, y), ((pickers[i][1]), pickers[i][2])), pickers, i)
-
     xDist = x - pickers[i][1]
     yDist = y - pickers[i][2]
 
@@ -306,6 +313,7 @@ def movePicker(x,y,i):
         #print(txt.format("X and Y", i))
         return True
     else:
+        movePickerinDir(dirPicker((x, y), ((pickers[i][1]), pickers[i][2])), pickers, i)
         return False
 
 def pickerManagement(procedure):
@@ -359,8 +367,10 @@ goButton(1)
 
 def generateOrders(state, amount):
     for k in range(amount):
+        newBrickColor = random.sample(brickColor, 7)
         for i in range(len(brick)):
             brick[i][0] = random.randint(0,10)
+            brick[i][1] = newBrickColor[i]
         sendOrder(2)
 
 def sendOrder(orderType):
@@ -391,6 +401,8 @@ def reset():
         brick[i][0] = 0
     createButtons()
 
+val = -1
+
 def createButtons():
 
 
@@ -404,6 +416,27 @@ def createButtons():
     label.place(anchor='nw', x=210, y=10, width=180, height=20)
     labels.append(label)
 
+    order = tk.Label(guiFrame, bg='white', text='Order Status', fg='black',
+                     font=("Samsung Sharp Sans", 12, "bold"), bd=0)
+    order.place(anchor='nw', x=610, y=10, width=180, height=20)
+    labels.append(order)
+
+    global val
+    if val == -1:
+        txt = 'NO ORDER'
+    else:
+        txt = 'ORDER {}'
+
+    orderNumber = tk.Label(guiFrame, bg='white', text=txt.format(val), fg='black',
+                     font=("Samsung Sharp Sans", 12, "bold"), bd=0)
+    orderNumber.place(anchor='nw', x=610, y=40, width=180, height=20)
+    labels.append(orderNumber)
+
+    if val != -1:
+        orderNumber = tk.Label(guiFrame, bg='#20c94e', text='IS COMPLETED', fg='white',
+                               font=("Samsung Sharp Sans", 12, "bold"), bd=0)
+        orderNumber.place(anchor='nw', x=610, y=60, width=180, height=20)
+        labels.append(orderNumber)
 
     for i in range(7):
 
@@ -412,7 +445,7 @@ def createButtons():
         label.place(anchor='c', x=115, y=50+i*30, width=40, height=20)
         labels.append(label)
 
-        label = tk.Label(guiFrame, bg=brick[i][1], text=str(inventory[i]))
+        label = tk.Label(guiFrame, bg=brick[i][1])
         label.place(anchor='c', x=20, y=50+i*30, width=20, height=20)
         labels.append(label)
 
@@ -458,9 +491,9 @@ def getPosfromColor(color):
         j += 1
     return pos
 
-def cannopy(state,k,exceptID):
+def cannopy(occupation, k):
     angle = 0
-    l = 100
+    l = 300
 
     x = 1920 / 2
     y = 1080 / 2
@@ -475,191 +508,143 @@ def cannopy(state,k,exceptID):
         moveToGoal(i, bricks,target)
 
     l = 200
+    dontMove = -1
     for i in range(productBots):
-        if i != exceptID:
-            angle = i * (360/productBots) - k
+        angle = i * (360/productBots) - k
 
-            x = 960 + math.cos(math.radians(angle))*l
-            y = 540 + math.sin(math.radians(angle))*l
+        x = 960 + math.cos(math.radians(angle))*l
+        y = 540 + math.sin(math.radians(angle))*l
 
-            target = [x,y]
+        target = [x,y]
 
-            movePicker(x, y, i)
 
-    k = k + 0.2
+        for j in range(len(occupation)):
+            if occupation[j][0] == i:
+                dontMove = i
+        if i != dontMove:
+            movePicker(x,y,i)
+
     if k == 360:
         k = 0
     return k
 
 
-occupation = []
-for i in range(productBots):
-    occupation.append('Not Occupied')
-
 pickup = []
 for i in range(productBots):
-    pickup.append('Not Occupied')
+    pickup.append(False)
 
-deployment = []
-for i in range(productBots):
-    deployment.append(['False', 0])
+maxOrders = 100
+occupation = []
+for i in range(maxOrders):
+    occupation.append([-1,0,6,-1])
+    # Element index resembles OrderID
+    # A maximum of maxOrders is possible for this simulation.
 
-cVal = [6,6,6,6,6,6,6,6,6,6]
-pick = [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1]
+    # First digit resembles PickerID
+    # -1 Equals no picker selected
 
-
-
-def givePickerOrder(i, k):
-    # Check if Picker is occupied. If not, move on
-
-    completion = ["Complete", "Complete", "Complete", "Complete", "Complete", "Complete", "Complete"]
-    if i in completedList:
-        return
-    for t in range(len(orderList[i])):
-        completion[t] = 'Not Complete'
-
-    k = pick[i]
-
-    if occupation[i] == 'Not Occupied':
-        occupation[i] = 'Occupied'
-        pick[i] = i
-
-
-
-    if completion[cVal[i]] == 'Not Complete' and occupation[i] == 'Occupied' and pickup[i] == 'Not Occupied':
-        x ,y = getPosfromColor(orderList[i][cVal[i]][1])
-        if movePicker(x, y, k):
-            completion[cVal[i]] = 'Complete'
-            #print(cVal)
-            #print("Order Completed")
-            #list(orderList[i]).pop
-            ind = brickIndex.index(orderList[i][cVal[i]][1])
-            inventory[ind] -= orderList[i][cVal[i]][0]
-            if inventory[ind] <= 0:
-                print(str('Brick inventory for ') + str(orderList[i][cVal[i]][1]) + str(' needs refilling'))
-
-
-                ## To do -> Add some sort of ignore mode
-
-            ### Take from inventory of productbots
-            #print(list(orderList[i]))
-
-            if cVal[i] == 0:
-                print(str('Picker #') + str(i) + str(" is ready for Deploying"))
-                deployment[i][0] = 'True'
-                kVal = 1
-                for t in range(len(deployment)):
-                    if deployment[t][1] == 1:
-                        kVal += 1
-                    elif deployment[t][1] == 2:
-                        kVal += 1
-                    elif deployment[t][1] == 3:
-                        kVal += 1
-                    elif deployment[t][1] == 4:
-                        kVal += 1
-                deployment[i][1] = kVal
-                #print(deployment[i][1])
-                pickup[i] = 'Done'
-    #print(completion)
-
-    if completion[cVal[i]] == 'Complete' and occupation[i] == 'Occupied' and pickup[i] == 'Not Occupied':
-        if cVal[i] >= 1:
-            cVal[i] -= 1
-
-    if deployment[i][0] == 'True' and occupation[i] == 'Occupied' and pickup[i] == 'Done':
-        ## SELECT DEPLOY STATION HERE
-        xCoord = xDeploy
-        yCoord = yDeploy1
-
-        if deployment[i][1] >= 5:
-            movePicker(xCoord-200, 1080/2, k)
-
-
-        if deployment[i][1] == 1:
-            deploy[0] = 1
-            yCoord = yDeploy1
-            if movePicker(xCoord, yCoord, k):
-                orderList.pop(i)
-                occupation[i] = 'Not Occupied'
-                deployment[i][0] = 'False'
-                pickup[i] = 'Not Occupied'
-                deploy[0] = 0
-                cVal[i] = 6
-                deployment[i][1] = 0
-                completedList.append(i)
-                p = -1
-                pick[i] = -1
-                return p
-        elif deployment[i][1] == 2:
-            deploy[1] = 1
-            yCoord = yDeploy2
-            if movePicker(xCoord, yCoord, k):
-                orderList.pop(i)
-                occupation[i] = 'Not Occupied'
-                deployment[i][0] = 'False'
-                pickup[i] = 'Not Occupied'
-                deploy[1] = 0
-                cVal[i] = 6
-                deployment[i][1] = 0
-                completedList.append(i)
-                p = -1
-                pick[i] = -1
-                return p
-        elif deployment[i][1] == 3:
-            deploy[2] = 1
-            yCoord= yDeploy3
-            if movePicker(xCoord, yCoord, k):
-                orderList.pop(1)
-                occupation[i] = 'Not Occupied'
-                deployment[i][0] = 'False'
-                pickup[i] = 'Not Occupied'
-                deploy[2] = 0
-                cVal[i] = 6
-                deployment[i][1] = 0
-                completedList.append(i)
-                p = -1
-                pick[i] = -1
-                return p
-        elif deployment[i][1] == 4:
-            deploy[3] = 1
-            yCoord = yDeploy4
-            if movePicker(xCoord, yCoord, k):
-                orderList.pop(1)
-                occupation[i] = 'Not Occupied'
-                deployment[i][0] = 'False'
-                pickup[i] = 'Not Occupied'
-                deploy[3] = 0
-                cVal[i] = 6
-                deployment[i][1] = 0
-                p = -1
-                pick[i] = -1
-                return p
-    else:
-        return
+    # Second digit resembles OrderState
+    # 0 Equals no order
+    # 1 Equals order accepting bot
+    # 2 Equals order not accepting bot
+    # 3 Equals order is done
 
 # Waiting pos:
-x1 = widthBase-200
-y1 = heightBase/2 + 50
+xDeploy = widthBase - 200
+yDeploy = heightBase / 2 + 50
 
 # Deploy pos:
-xDeploy = widthBase - 110
-yDeploy1 = heightBase / 2 - 325 / 2 + (325 / 3) * 0
-yDeploy2 = heightBase / 2 - 325 / 2 + (325 / 3) * 1
-yDeploy3 = heightBase / 2 - 325 / 2 + (325 / 3) * 2
-yDeploy4 = heightBase / 2 - 325 / 2 + (325 / 3) * 3
+xDeployS = widthBase - 110
+yDeployS = [heightBase / 2 - 325 / 2 + (325 / 3) * 0, heightBase / 2 - 325 / 2 + (325 / 3) * 1, heightBase / 2 - 325 / 2 + (325 / 3) * 2, heightBase / 2 - 325 / 2 + (325 / 3) * 3]
 
-def movePickerToDeploy(i):
-    if deploy[0] == 0:
-        deploy[0] = 1
-        global yP
-        yP = yDeploy1
-        global xP
-        xP = xDeploy
-        #movePicker(xDeploy, yP, i)
+def givePickerOrder2():
+    distVal = 0
+    dist = 10
 
-    if movePicker(xDeploy, yP, i) and deploy[0] == 1:
-        deployment[i][0] = 'False'
-        deploy[0] = 0
+    for i in range(len(orderList)):
+        if occupation[i][1] == 0:
+            occupation[i][1] = 1
+            print(occupation)
+
+    for i in range(len(occupation)):
+        if occupation[i][0] == -1 and occupation[i][1] == 1:
+            ## We have found an order that is ready for picker designation.
+            ## We shall now assign a picker
+            for j in range(productBots):
+                if pickup[j] == False:
+                    pickup[j] = True
+                    # Assign picker to order index
+                    occupation[i][0] = j
+                    # Set orderState to now not accepting picker
+                    occupation[i][1] = 2
+
+                    print(occupation)
+                    # Exit for-loop
+                    break
+    for i in range(len(occupation)):
+        if occupation[i][0] != -1 and occupation[i][1] == 2 and occupation[i][3] == -1:
+            ## We have found a picker that is assigned to an order.
+            ## Finish the order
+            completion = [0,0,0,0,0,0,0]
+            for t in range(len(orderList[i])):
+                completion[t] = 1
+
+            if completion[occupation[i][2]] == 1:
+                # First get the position of the desired color:
+                x, y = getPosfromColor(orderList[i][occupation[i][2]][1])
+
+                # Move the selected picker to this desired position. Return true, if it gets there:
+                if movePicker(x, y, occupation[i][0]):
+
+                    # When it gets there, set the completion[cVal[i]] to complete:
+                    completion[occupation[i][2]] = 0
+
+                    if occupation[i][2] == 0:
+                        occupation[i][3] = -2
+
+            if completion[occupation[i][2]] == 0:
+                if occupation[i][2] >= 1:
+                    occupation[i][2] -= 1
+
+        if occupation[i][3] == -2:
+            # Select deploy station
+
+            if all(o == 1 for o in deploy):
+                xD = widthBase - 200
+                yD = heightBase / 2
+                occupation[i][3] = -2
+                movePicker(xD - distVal, yD, occupation[i][0])
+                distVal += dist
+            else:
+                for k in range(len(deploy)):
+                    if deploy[k] == 0:
+                        deploy[k] = 1
+                        occupation[i][3] = k
+                        break
+
+        if occupation[i][3] >= 0:
+            xDeploy = xDeployS
+            yDeploy = yDeployS[occupation[i][3]]
+            if movePicker(xDeploy, yDeploy, occupation[i][0]):
+                # print(str('Picker #') + str(i) + str(" is ready for Deploying"))
+
+                # The picker is done picking
+                occupation[i][1] = 3
+                print(occupation)
+                pickup[occupation[i][0]] = False
+                # print(pickup)
+                occupation[i][2] = 6
+                print(occupation[i][3])
+                deploy[occupation[i][3]] = 0
+                global val
+                val = i
+                orderStateWindow.configure(state="normal")
+                orderStateWindow.insert(tk.END, '  Completed: ' + str(i) + '\n')
+                orderStateWindow.configure(state="disabled")
+                occupation[i][3] = -1
+                occupation[i][0] = -1
+                # print(occupation)
+
 
 
 spawnDeploy()
@@ -696,30 +681,33 @@ while True:
     ## Obstacle / Safety Avoidance
     procedure = createProcedure(orderList)
 
-    troels = obstacleSafety(labels,bricks)
-    #tonny = obstacleSafety(labels,pickers)
+    troels = obstacleSafety(labels,bricks,25)
+    tonny = obstacleSafety(labels,pickers,50)
 
     #swarmPlacement(procedure,troels)
     p = 0
 
     ## WAITING STATE
-    if len(orderList) == 0:
-        k = cannopy(state, k, -1)
-    elif len(orderList) <= 10:
-        completedList = []
-        for i in range(len(orderList)):
-            print(pick)
 
-            p = givePickerOrder(i, p)
-            if p == -1:
-                print("Hello")
-                break
-    else:
-        for i in range(10):
-            p = givePickerOrder(i, p)
-            if p == -1:
-                print("Hello")
-                break
+
+
+    givePickerOrder2()
+    givePickerOrder2()
+    cannopy(occupation, k)
+    #     completedList = []
+    #     for i in range(len(orderList)):
+    #         print(pick)
+    #
+    #         p = givePickerOrder(i, p)
+    #         if p == -1:
+    #             print("Hello")
+    #             break
+    # else:
+    #     for i in range(10):
+    #         p = givePickerOrder(i, p)
+    #         if p == -1:
+    #             print("Hello")
+    #             break
 
             #k = cannopy(state, k, i)
 
