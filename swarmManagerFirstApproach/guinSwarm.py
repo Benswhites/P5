@@ -387,8 +387,8 @@ def sendOrder(orderType):
 
     if k != 0:
         orderWindow.configure(state="normal")
-        orderWindow.insert(tk.END, '  '+ order_str + '\n')
-
+        string = ('  '+ order_str + '\n')
+        orderWindow.insert(tk.END, string)
         copyList = deepcopy(order)
         orderList.append(copyList)
         orderWindow.configure(state="disabled")
@@ -402,6 +402,7 @@ def reset():
     createButtons()
 
 val = -1
+sel = -1
 
 def createButtons():
 
@@ -422,7 +423,9 @@ def createButtons():
     labels.append(order)
 
     global val
+    global sel
     if val == -1:
+
         txt = 'NO ORDER'
     else:
         txt = 'ORDER {}'
@@ -432,8 +435,28 @@ def createButtons():
     orderNumber.place(anchor='nw', x=610, y=40, width=180, height=20)
     labels.append(orderNumber)
 
-    if val != -1:
-        orderNumber = tk.Label(guiFrame, bg='#20c94e', text='IS COMPLETED', fg='white',
+    if sel == 0:
+        orderNumber = tk.Label(guiFrame, bg='#20c94e', text='COMPLETED', fg='white',
+                               font=("Samsung Sharp Sans", 12, "bold"), bd=0)
+        orderNumber.place(anchor='nw', x=610, y=60, width=180, height=20)
+        labels.append(orderNumber)
+
+    if sel == 1:
+        orderNumber = tk.Label(guiFrame, bg='#d19a2c', text='WAITING', fg='white',
+                               font=("Samsung Sharp Sans", 12, "bold"), bd=0)
+        orderNumber.place(anchor='nw', x=610, y=60, width=180, height=20)
+        labels.append(orderNumber)
+
+    if sel == 2:
+        orderNumber = tk.Label(guiFrame, bg='#343aeb', text='INBOUND', fg='white',
+                               font=("Samsung Sharp Sans", 12, "bold"), bd=0)
+        orderNumber.place(anchor='nw', x=610, y=60, width=180, height=20)
+        labels.append(orderNumber)
+
+    if sel == 3:
+        global picker
+        txt = 'ATTACHED PICKER {}'
+        orderNumber = tk.Label(guiFrame, bg='#343aeb', text=txt.format(picker), fg='white',
                                font=("Samsung Sharp Sans", 12, "bold"), bd=0)
         orderNumber.place(anchor='nw', x=610, y=60, width=180, height=20)
         labels.append(orderNumber)
@@ -536,7 +559,7 @@ for i in range(productBots):
 maxOrders = 100
 occupation = []
 for i in range(maxOrders):
-    occupation.append([-1,0,6,-1])
+    occupation.append([-1,0,6,-1,0,0])
     # Element index resembles OrderID
     # A maximum of maxOrders is possible for this simulation.
 
@@ -558,13 +581,14 @@ xDeployS = widthBase - 110
 yDeployS = [heightBase / 2 - 325 / 2 + (325 / 3) * 0, heightBase / 2 - 325 / 2 + (325 / 3) * 1, heightBase / 2 - 325 / 2 + (325 / 3) * 2, heightBase / 2 - 325 / 2 + (325 / 3) * 3]
 
 def givePickerOrder2():
+    global val
+    global sel
     distVal = 0
     dist = 10
 
     for i in range(len(orderList)):
         if occupation[i][1] == 0:
             occupation[i][1] = 1
-            print(occupation)
 
     for i in range(len(occupation)):
         if occupation[i][0] == -1 and occupation[i][1] == 1:
@@ -577,13 +601,21 @@ def givePickerOrder2():
                     occupation[i][0] = j
                     # Set orderState to now not accepting picker
                     occupation[i][1] = 2
-
-                    print(occupation)
                     # Exit for-loop
                     break
     for i in range(len(occupation)):
         if occupation[i][0] != -1 and occupation[i][1] == 2 and occupation[i][3] == -1:
             ## We have found a picker that is assigned to an order.
+            if occupation[i][5] == 0:
+                occupation[i][5] = 1
+                val = i
+                sel = 3
+                global picker
+                picker = occupation[i][0]
+                orderStateWindow.configure(state="normal")
+                string = ('   Order: ' + str(i) + ' attached to picker: ' + str(occupation[i][0]) +'\n')
+                orderStateWindow.insert(tk.END, string)
+                orderStateWindow.configure(state="disabled")
             ## Finish the order
             completion = [0,0,0,0,0,0,0]
             for t in range(len(orderList[i])):
@@ -615,11 +647,24 @@ def givePickerOrder2():
                 occupation[i][3] = -2
                 movePicker(xD - distVal, yD, occupation[i][0])
                 distVal += dist
+                if occupation[i][4] == 0:
+                    val = i
+                    sel = 1
+                    orderStateWindow.configure(state="normal")
+                    orderStateWindow.insert(tk.END, '   Order: ' + str(i) + ' is waiting\n')
+                    orderStateWindow.configure(state="disabled")
+                    occupation[i][4] = 1
             else:
                 for k in range(len(deploy)):
                     if deploy[k] == 0:
                         deploy[k] = 1
                         occupation[i][3] = k
+                        occupation[i][4] = 0
+                        val = i
+                        sel = 2
+                        orderStateWindow.configure(state="normal")
+                        orderStateWindow.insert(tk.END, '   Order: ' + str(i) + ' is inbound\n')
+                        orderStateWindow.configure(state="disabled")
                         break
 
         if occupation[i][3] >= 0:
@@ -630,20 +675,24 @@ def givePickerOrder2():
 
                 # The picker is done picking
                 occupation[i][1] = 3
-                print(occupation)
                 pickup[occupation[i][0]] = False
                 # print(pickup)
                 occupation[i][2] = 6
-                print(occupation[i][3])
                 deploy[occupation[i][3]] = 0
-                global val
+                occupation[i][5] = 0
                 val = i
+                sel = 0
                 orderStateWindow.configure(state="normal")
-                orderStateWindow.insert(tk.END, '  Completed: ' + str(i) + '\n')
+                orderStateWindow.insert(tk.END, '   Order: ' + str(i) + ' is completed\n')
                 orderStateWindow.configure(state="disabled")
+                orderWindow.configure(state="normal")
+                #orderWindow.delete('1.0','end')
+                orderWindow.configure(state="disabled")
                 occupation[i][3] = -1
                 occupation[i][0] = -1
                 # print(occupation)
+
+
 
 
 
