@@ -375,6 +375,8 @@ def generateOrders(state, amount):
             for i in range(len(brick)):
                 brick[i][0] = random.randint(0,10)
                 brick[i][1] = newBrickColor[i]
+                if brick[i][0] == 1:
+                    brick[i][0] = random.randint(1,5)
             sendOrder(2)
     if mode == 2:
         for k in range(amount):
