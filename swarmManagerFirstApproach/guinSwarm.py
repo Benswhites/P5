@@ -5,6 +5,7 @@ import ArrayLists
 import swarmClass
 import taskClass
 from copy import deepcopy
+from collections import Counter
 import time as t
 import threading
 
@@ -366,12 +367,21 @@ rndButton()
 goButton(1)
 
 def generateOrders(state, amount):
-    for k in range(amount):
-        newBrickColor = random.sample(brickColor, 7)
-        for i in range(len(brick)):
-            brick[i][0] = random.randint(0,10)
-            brick[i][1] = newBrickColor[i]
-        sendOrder(2)
+    mode = 1
+
+    if mode == 1:
+        for k in range(amount):
+            newBrickColor = random.sample(brickColor, 7)
+            for i in range(len(brick)):
+                brick[i][0] = random.randint(0,10)
+                brick[i][1] = newBrickColor[i]
+            sendOrder(2)
+    if mode == 2:
+        for k in range(amount):
+            for i in range(1):
+                brick[i][0] = random.randint(0,10)
+                brick[i][1] = 'Red'
+            sendOrder(2)
 
 def sendOrder(orderType):
     order = []
@@ -514,6 +524,69 @@ def getPosfromColor(color):
         j += 1
     return pos
 
+def getDistance(picker, targetX, targetY):
+    pickerX = pickers[picker][1]
+    pickerY = pickers[picker][2]
+    dist = math.sqrt((targetX - pickerX) ** 2 + (targetY - pickerY) ** 2)
+    return round(dist,1)
+
+def queueCal(queue):
+    colors = []
+    colorsAvail = []
+    queList = []
+
+    # Get all elements of list:
+    for i in range(len(queue)):
+        if queue[i][0] not in colorsAvail:
+            colorsAvail.append(queue[i][0])
+        colors.append(queue[i][0])
+
+    # Get individual occurences:
+    # occurences = Counter(colors)
+    for i in range(len(colorsAvail)):
+        # print('Color {} is shown {} times'.format(str(colorsAvail[i]),occurences[str(colorsAvail[i])]))
+        distance = []
+        jVals = []
+        for j in range(len(queue)):
+            if queue[j][0] == colorsAvail[i]:
+                distance.append(queue[j][1])
+                jVals.append(j)
+        distance, jVals = zip(*sorted(zip(distance, jVals)))
+
+        for j in range(len(jVals)):
+            if queue[jVals[j]][0] == '' or j == 0:
+                queue[jVals[j]][2] = -1
+            else:
+                queue[jVals[j]][2] = j * 1
+    for j in range(len(queue)):
+        queList.append([j, queue[j][2]])
+    #print(queue)
+    return queList
+
+def moveToWaitPos(targetX,targetY,picker,waitPos):
+    position = waitPos
+    if targetY >= 540 and targetX >= 960:
+        position = waitPos
+    if targetY >= 540 and targetX <= 960:
+        position = waitPos + 3
+    if targetY <= 540 and targetX >= 960:
+        position = waitPos + 8
+    if targetY <= 540 and targetX <= 960:
+        position = waitPos + 5
+    l = 50
+
+    print(position)
+
+    angle = position * (360 / processBots)
+
+    x = targetX + math.cos(math.radians(angle)) * l
+    y = targetY + math.sin(math.radians(angle)) * l
+
+    target = [x, y]
+
+    movePicker(x, y, picker)
+    return
+
 def cannopy(occupation, k):
     angle = 0
     l = 300
@@ -523,8 +596,8 @@ def cannopy(occupation, k):
     for i in range(processBots):
         angle = i * (360/processBots)
 
-        x = 960 + math.cos(math.radians(angle))*l
-        y = 540 + math.sin(math.radians(angle))*l
+        x = 960 - math.cos(math.radians(angle))*l
+        y = 540 - math.sin(math.radians(angle))*l
 
         target = [x,y]
 
@@ -571,6 +644,13 @@ for i in range(maxOrders):
     # 1 Equals order accepting bot
     # 2 Equals order not accepting bot
     # 3 Equals order is done
+
+color = ''
+distanceToColor = 0
+queuePosition = -1
+queue = []
+for i in range(productBots):
+    queue.append([color,distanceToColor, queuePosition])
 
 # Waiting pos:
 xDeploy = widthBase - 200
@@ -625,14 +705,43 @@ def givePickerOrder2():
                 # First get the position of the desired color:
                 x, y = getPosfromColor(orderList[i][occupation[i][2]][1])
 
-                # Move the selected picker to this desired position. Return true, if it gets there:
-                if movePicker(x, y, occupation[i][0]):
+                # An idea:
+                # Append the current color to an array with the size of "productbots".
+                # Thus fx, if PB (productbots) 1 and 4 are going to red:
+                # ['Red', '', '', 'Red', '', ''] <--- Something
+                # However, this requires some timing, since this would just allow the first robot (even the farthest) to block the processbot.
+                # Probably not the best approach... but it might actually work
 
-                    # When it gets there, set the completion[cVal[i]] to complete:
-                    completion[occupation[i][2]] = 0
+                queue[occupation[i][0]][0] = orderList[i][occupation[i][2]][1]
 
-                    if occupation[i][2] == 0:
-                        occupation[i][3] = -2
+                # Calculate distance between productbot and processbot
+                # x and y are the position of the processbot.
+
+                queue[occupation[i][0]][1] = getDistance(occupation[i][0], x, y)
+
+                if occupation[i][2] == 0:
+                    queue[occupation[i][0]][0] = ''
+
+                queList = queueCal(queue)
+
+                #print(queList)
+                if queList[occupation[i][0]][1] != -1:
+                    moveToWaitPos(x,y,occupation[i][0],queList[occupation[i][0]][1])
+
+                else:
+                    # Move the selected picker to this desired position. Return true, if it gets there:
+                    if movePicker(x, y, occupation[i][0]):
+
+
+                        # We know the color, at which the robot has just arrived: orderList[i][occupation[i][2]][1]
+
+
+                        # When it gets there, set the completion[cVal[i]] to complete:
+                        completion[occupation[i][2]] = 0
+
+                        if occupation[i][2] == 0:
+
+                            occupation[i][3] = -2
 
             if completion[occupation[i][2]] == 0:
                 if occupation[i][2] >= 1:
