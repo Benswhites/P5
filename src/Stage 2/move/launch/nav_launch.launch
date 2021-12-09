@@ -1,0 +1,21 @@
+<launch>
+
+  <node pkg="move" name="go_to_goal1" type="go_to_goal.py" output="screen">
+      <remap from="move_base"       to="Bot1/move_base"/>
+      <param name="~x_position"      type="double"      value="2.0"/>
+      <param name="~y_position"      type="double"      value="2.0"/>
+  </node>
+
+  <node pkg="move" name="go_to_goal2" type="go_to_goal.py" output="screen">
+      <remap from="move_base"       to="Bot2/move_base"/>
+      <param name="~x_position"      type="double"      value="0.0"/>
+      <param name="~y_position"      type="double"      value="0.0"/>
+  </node>
+
+  <node pkg="move" name="go_to_goal3" type="go_to_goal.py" output="screen">
+      <remap from="move_base"       to="Bot3/move_base"/>
+      <param name="~x_position"      type="double"      value="4.0"/>
+      <param name="~y_position"      type="double"      value="4.0"/>
+  </node>
+
+</launch>
