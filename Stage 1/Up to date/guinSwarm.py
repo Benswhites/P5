@@ -1,13 +1,8 @@
 import random
 import tkinter as tk
 import math
-import ArrayLists
-import swarmClass
-import taskClass
 from copy import deepcopy
-from collections import Counter
-import time as t
-import threading
+
 
 # Change this, if you want more robots.
 # NOTE ONLY 7 PROCESSBOTS IS ALLOWED
@@ -18,26 +13,26 @@ processBots = 7 # These robots contain the products (eg. Bricks)
 orderInfo = []
 orderState = []
 
-botID = 0
-botTask = ''
-botState = 0
-
-# Pickerbots info
-orderInfo.append(botID)         # The ID of the robot:    An integer defining the robot.
-orderInfo.append(botTask)       # The task of the robot:  One could say the destination. 0-7 == colors. 8 == dropzone
-orderInfo.append(botState)      # The state of the robot: 0 == inactive, 1 == pickup, 2 == dropoff
+arrayOfProd = []
+arrayOfProc = []
+arrayOfInv = []
+arrayOfBricks = ["Red", "Blue", "Yellow", "Brown", "Green", "Cyan", "Orange"]
+arrayAvailableColor = []
+arrayAvailableBricks = []
 
 for i in range(productBots):
-    orderState.append(orderInfo)
+    arrayOfProd.append("Product_Bot" + str(i))
+    arrayOfInv.append(0)
 
-# FDP - Means; For Debugging Purposes
-#print(orderState)
+for i in range(processBots):
+    arrayOfProc.append("Process_Bot"+ str(i))
 
-# Cooperation with ROS
-swarmClass.CreateProductBot(productBots)
-swarmClass.CreateProcessBot(processBots)
-#swarmClass.MakeBotLaunch()
-taskClass.AmountBricks()
+colors = arrayOfBricks
+for i in range(len(arrayOfProc)):
+    color = colors[i]
+    amount = random.choice(range(5, 30)) #ændre til hvor meget der kan være i en robot
+    arrayAvailableColor.append(color)
+    arrayAvailableBricks.append(amount)
 
 
 widthBase = 800
@@ -58,7 +53,7 @@ gui.attributes('-fullscreen', False)
 orderList = []
 
 ## ["Red", "Blue", "Yellow", "Brown", "Green", "Purple", "Orange"]
-inventory = ArrayLists.arrayAvailableBricks
+inventory = arrayAvailableBricks
 
 brickColor = ["Red", "Blue", "Yellow", "Brown", "Green", "Cyan", "Orange"]
 brick = [[0, 'Red'], [0, 'Blue'], [0, 'Yellow'], [0, 'Brown'], [0, 'Green'], [0, 'Cyan'], [0,'Orange']]
@@ -98,9 +93,9 @@ frame.place(relwidth=1, relheight=1)
 
 root.attributes('-fullscreen', False)
 
-bricks = ArrayLists.arrayAvailableColor
+bricks = arrayAvailableColor
 
-pickers = ArrayLists.arrayOfProd
+pickers = arrayOfProd
 
 object = bricks + pickers
 
@@ -484,35 +479,6 @@ def createButtons():
         label.place(anchor='c', x=20, y=50+i*30, width=20, height=20)
         labels.append(label)
 
-### BELOW
-
-def ProdBotEat():
-    job = len(bagSample1)
-    order = ["Not Complete", "Not Complete", "Not Complete", "Not Complete", "Not Complete", "Not Complete",
-             "Not Complete", ]
-    while job != 0:
-        newamount = 50  # ændre til hvor meget der kan være i the process robot
-        for i in range(productBots):
-            for j in range(len(bagSample1)):
-                if int(list(bagSample1[j][0])[0]) > 0 and ArrayLists.State[j] == "Not Occupied" and order[j] == "Not Complete":
-                    ArrayLists.State[j] = "Occupied"
-                    u = getPosfromColor(str(list(bagSample1[j][0])[1]))
-
-                    x1 = u[0]
-                    y1= u[1]
-                    movePicker(x1, y1, i)
-
-                    #totalAmountOfColor = ArrayLists.arrayAvailableBricks[ArrayLists.arrayAvailableColor.index(ArrayLists.arrayOfBricks[j])]
-                    #prodTaskHowManyOfColor = bagSample1[i][0][0]
-                    #ArrayLists.arrayOfInv[i] += prodTaskHowManyOfColor
-                    #newAmountAfterBrickGone = totalAmountOfColor - prodTaskHowManyOfColor
-                    #ArrayLists.arrayAvailableBricks[ArrayLists.arrayAvailableColor.index(ArrayLists.arrayOfBricks[j])] = newAmountAfterBrickGone
-                    #if ArrayLists.arrayAvailableBricks[ArrayLists.arrayAvailableColor.index(ArrayLists.arrayOfBricks[j])] < 5:  # ændre til det antal bricks der skal til for en ordre
-                    #    ArrayLists.arrayAvailableBricks[ArrayLists.arrayAvailableColor.index(ArrayLists.arrayOfBricks[j])] = newamount
-                    job -= 1
-                    ArrayLists.State[j] = "Not Occupied"
-                    order[j] = "Complete"
-
 def getPosfromColor(color):
     object = pickers + bricks
     search = str(color)
@@ -838,46 +804,21 @@ while True:
 
     crtDeployStation(labels,2)
 
-    ## Obstacle / Safety Avoidance
+    
     procedure = createProcedure(orderList)
 
+    ## Obstacle / Safety Avoidance
     troels = obstacleSafety(labels,bricks,25)
     tonny = obstacleSafety(labels,pickers,50)
 
-    #swarmPlacement(procedure,troels)
-    p = 0
-
-    ## WAITING STATE
-
-
-
+    ## Function for queuing
     givePickerOrder2()
     givePickerOrder2()
+    
+    ## Waiting position
     cannopy(occupation, k)
-    #     completedList = []
-    #     for i in range(len(orderList)):
-    #         print(pick)
-    #
-    #         p = givePickerOrder(i, p)
-    #         if p == -1:
-    #             print("Hello")
-    #             break
-    # else:
-    #     for i in range(10):
-    #         p = givePickerOrder(i, p)
-    #         if p == -1:
-    #             print("Hello")
-    #             break
-
-            #k = cannopy(state, k, i)
-
-    # Add functionality for max 10 orders at a time. Wait for order 11 eg.
-
-    #print(ArrayLists.arrayAvailableColor)
-
-    #for i in range(len(procedure)):
-
-
+    
+    ## Update windows 
     root.update()
     gui.update()
 
