@@ -16,6 +16,13 @@
     <rosparam file="$(find turtlebot3_navigation)/param/move_base_params.yaml" command="load" />
     <rosparam file="$(find turtlebot3_navigation)/param/dwa_local_planner_params_$(arg model).yaml" command="load" />
 
+    <!-- reset frame_id parameters using user input data -->
+    <param name="global_costmap/global_frame"     value="map"/>
+    <param name="global_costmap/robot_base_frame" value="$(arg namespace)/base_footprint"/>
+    <param name="local_costmap/global_frame"      value="$(arg namespace)/odom"/>
+    <param name="local_costmap/robot_base_frame"  value="$(arg namespace)/base_footprint"/>
+    <param name="DWAPlannerROS/global_frame_id"   value="$(arg namespace)/odom"/>
+
     <remap from="cmd_vel" to="$(arg cmd_vel_topic)"/>
     <remap from="odom" to="$(arg odom_topic)"/>
     <param name="DWAPlannerROS/min_vel_x" value="0.0" if="$(arg move_forward_only)" />
