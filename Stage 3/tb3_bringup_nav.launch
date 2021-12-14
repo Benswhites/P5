@@ -1,10 +1,16 @@
 <launch>
   <include file="$(find turtlebot3_navigation)/run/make_robot.launch" >
     <arg name="namespace"      value="Bot1" />
+    <arg name="initial_pose_x"    default="-4.2"/>
+    <arg name="initial_pose_y"    default="3,6"/>
+    <arg name="initial_pose_a"    default="1.12"/>
   </include>
 
   <include file="$(find turtlebot3_navigation)/run/make_robot.launch" >
-    <arg name="namespace"      value="Bot1" />
+    <arg name="namespace"      value="Bot2" />
+    <arg name="initial_pose_x"    default="-3,8"/>
+    <arg name="initial_pose_y"    default="3,5"/>
+    <arg name="initial_pose_a"    default="1.12"/>
   </include>
 
 <!-- Visualization and map/world location -->
