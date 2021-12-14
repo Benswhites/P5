@@ -1,0 +1,24 @@
+<launch>
+  <include file="$(find turtlebot3_navigation)/run/make_robot.launch" >
+    <arg name="namespace"      value="Bot1" />
+  </include>
+
+  <include file="$(find turtlebot3_navigation)/run/make_robot.launch" >
+    <arg name="namespace"      value="Bot1" />
+  </include>
+
+<!-- Visualization and map/world location -->
+  <arg name="map_file"    default="$(find turtlebot3_navigation)/maps/NAME.yaml"/>
+  <arg name="open_rviz"   default="true"/>
+
+<!-- Map server -->
+  <node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)" >
+    <param name="frame_id" value="map"/>
+  </node>
+
+<!-- Rviz -->
+  <group if="$(arg open_rviz)"> 
+    <node pkg="rviz" type="rviz" name="rviz" output="screen" args="-d $(find turtlebot3_navigation)/rviz/turtlebot3_configuration.rviz"/>
+  </group>
+
+</launch>
