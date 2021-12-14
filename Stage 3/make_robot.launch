@@ -1,15 +1,14 @@
 <launch>
   <!-- Arguments -->
   <arg name="namespace"/>
+  <arg name="initial_pose_x"    default="0.0"/>
+  <arg name="initial_pose_y"    default="0.0"/>
+  <arg name="initial_pose_a"    default="0.0"/>
 
   <!-- Static Arguments -->
   <arg name="model"             default="burger"/>
   <arg name="move_forward_only" default="false"/>
   <arg name="use_map_topic"     default="false"/>
-  <arg name="initial_pose_x"    default="1.0"/>
-  <arg name="initial_pose_y"    default="-1.0"/>
-  <arg name="initial_pose_a"    default="1.57"/>
-
 
   <!-- Turtlebot3 -->
   <include file="$(find turtlebot3_bringup)/launch/turtlebot3_remote.launch">
