@@ -1,0 +1,136 @@
+<launch>
+  <!-- Arguments -->
+  <arg name="namespace" value="Bot1"/>
+
+  <!-- Static Arguments -->
+  <arg name="model"             default="burger"/>
+  <arg name="map_file"          default="$(find navigation)/maps/home_top_covered.yaml"/>
+  <arg name="open_rviz"         default="true"/>
+  <arg name="move_forward_only" default="false"/>
+
+  <!-- This pose corresponds with the robot being between the pillars facing out, in home_top_covered.yaml -->
+  <arg name="initial_pose_x"    default="1.0"/>
+  <arg name="initial_pose_y"    default="-1.0"/>
+  <arg name="initial_pose_a"    default="1.57"/>
+
+
+  <!-- Turtlebot3 -->
+  <include file="$(find turtlebot3_bringup)/launch/turtlebot3_remote.launch">
+    <arg name="model" value="$(arg model)" />
+    <arg name="multi_robot_name" value="$(arg namespace)"/>
+  </include>
+
+  <!-- Map server -->
+  <node pkg="map_server" name="map_server" type="map_server" args="$(arg map_file)"/>
+
+  <!-- AMCL -->
+  <node pkg="amcl" type="amcl" name="amcl">
+
+    <param name="min_particles"             value="500"/>
+    <param name="max_particles"             value="3000"/>
+    <param name="kld_err"                   value="0.02"/>
+    <param name="update_min_d"              value="0.20"/>
+    <param name="update_min_a"              value="0.20"/>
+    <param name="resample_interval"         value="1"/>
+    <param name="transform_tolerance"       value="0.5"/>
+    <param name="recovery_alpha_slow"       value="0.00"/>
+    <param name="recovery_alpha_fast"       value="0.00"/>
+    <param name="initial_pose_x"            value="$(arg initial_pose_x)"/>
+    <param name="initial_pose_y"            value="$(arg initial_pose_y)"/>
+    <param name="initial_pose_a"            value="$(arg initial_pose_a)"/>
+    <param name="gui_publish_rate"          value="50.0"/>
+
+    <remap from="scan"                      to="$(arg namespace)/scan"/>
+    <param name="laser_max_range"           value="3.5"/>
+    <param name="laser_max_beams"           value="180"/>
+    <param name="laser_z_hit"               value="0.5"/>
+    <param name="laser_z_short"             value="0.05"/>
+    <param name="laser_z_max"               value="0.05"/>
+    <param name="laser_z_rand"              value="0.5"/>
+    <param name="laser_sigma_hit"           value="0.2"/>
+    <param name="laser_lambda_short"        value="0.1"/>
+    <param name="laser_likelihood_max_dist" value="2.0"/>
+    <param name="laser_model_type"          value="likelihood_field"/>
+
+    <param name="odom_model_type"           value="diff"/>
+    <param name="odom_alpha1"               value="0.1"/>
+    <param name="odom_alpha2"               value="0.1"/>
+    <param name="odom_alpha3"               value="0.1"/>
+    <param name="odom_alpha4"               value="0.1"/>
+    <param name="odom_frame_id"             value="$(arg namespace)/odom"/>
+    <param name="base_frame_id"             value="$(arg namespace)/base_footprint"/>
+
+  </node>
+
+  <!-- move_base -->
+  <node pkg="move_base" type="move_base" respawn="false" name="$(arg namespace)_move_base" output="screen">
+    <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS" />
+    <param name="DWAPlannerROS/min_vel_x" value="0.0" if="$(arg move_forward_only)" />
+    
+    <rosparam file="$(find deploy)/param/costmap_common_params_$(arg model)_$(arg namespace).yaml"      command="load" ns="global_costmap" />
+    <rosparam file="$(find deploy)/param/costmap_common_params_$(arg model)_$(arg namespace).yaml"      command="load" ns="local_costmap" />
+    <rosparam file="$(find deploy)/param/local_costmap_params.yaml"                  		        command="load" />
+    <rosparam file="$(find deploy)/param/global_costmap_params.yaml"                 			command="load" />
+    <rosparam file="$(find deploy)/param/move_base_params.yaml"                      			command="load" />
+    <rosparam file="$(find deploy)/param/dwa_local_planner_params_$(arg model).yaml" 			command="load" />
+    <rosparam file="$(find deploy)/param/global_planner_params.yaml"                 			command="load" />
+    <rosparam file="$(find deploy)/param/navfn_global_planner_params.yaml"           			command="load" />
+
+
+    <!-- reset frame_id parameters using user input data -->
+    <param name="global_costmap/global_frame"     value="map"/>
+    <param name="global_costmap/robot_base_frame" value="$(arg namespace)/base_footprint"/>
+    <param name="local_costmap/global_frame"      value="$(arg namespace)/odom"/>
+    <param name="local_costmap/robot_base_frame"  value="$(arg namespace)/base_footprint"/>
+    <param name="DWAPlannerROS/global_frame_id"   value="$(arg namespace)/odom"/>
+
+    <remap from="cmd_vel"                                                            to="$(arg namespace)/cmd_vel"/>
+    <remap from="odom"                                                               to="$(arg namespace)/odom"/>
+    <remap from="scan"                                                               to="$(arg namespace)/scan"/>
+    <remap from="map"                                                                to="map" />
+    <remap from="base_scan"                                                          to="$(arg namespace)/base_scan"/>
+    <remap from="move_base_simple/goal"				                                       to="$(arg namespace)/move_base_simple/goal" />
+    <remap from="move_base/DWAPlannerROS/cost_cloud"                                 to="$(arg namespace)/move_base/DWAPlannerROS/cost_cloud" />
+    <remap from="move_base/DWAPlannerROS/global_plan"				                         to="$(arg namespace)/move_base/DWAPlannerROS/global_plan" />
+    <remap from="move_base/DWAPlannerROS/local_plan"				                         to="$(arg namespace)/move_base/DWAPlannerROS/local_plan" />
+    <remap from="move_base/DWAPlannerROS/parameter_descriptions"	                   to="$(arg namespace)/move_base/DWAPlannerROS/parameter_descriptions" />
+    <remap from="move_base/DWAPlannerROS/parameter_updates"		                       to="$(arg namespace)/move_base/DWAPlannerROS/parameter_updates" />
+    <remap from="move_base/DWAPlannerROS/trajectory_cloud"			                     to="$(arg namespace)/move_base/DWAPlannerROS/trajectory_cloud" />
+    <remap from="move_base/NavfnROS/plan"				                                     to="$(arg namespace)/move_base/NavfnROS/plan" />
+    <remap from="move_base/cancel"				                                           to="$(arg namespace)/move_base/cancel" />
+    <remap from="move_base/current_goal"				                                     to="$(arg namespace)/move_base/current_goal" />
+    <remap from="move_base/feedback"				                                         to="$(arg namespace)/move_base/feedback" />
+    <remap from="move_base/global_costmap/costmap"				                           to="$(arg namespace)/move_base/global_costmap/costmap" />
+    <remap from="move_base/global_costmap/costmap_updates"			                     to="$(arg namespace)/move_base/global_costmap/costmap_updates" />
+    <remap from="move_base/global_costmap/footprint"				                         to="$(arg namespace)/move_base/global_costmap/footprint" />
+    <remap from="move_base/global_costmap/inflation_layer/parameter_descriptions"    to="$(arg namespace)/move_base/global_costmap/inflation_layer/parameter_descriptions" />
+    <remap from="move_base/global_costmap/inflation_layer/parameter_updates"		     to="$(arg namespace)/move_base/global_costmap/inflation_layer/parameter_updates" />
+    <remap from="move_base/global_costmap/obstacle_layer/parameter_descriptions"	   to="$(arg namespace)/move_base/global_costmap/obstacle_layer/parameter_descriptions" />
+    <remap from="move_base/global_costmap/obstacle_layer/parameter_updates"			     to="$(arg namespace)/move_base/global_costmap/obstacle_layer/parameter_updates" />
+    <remap from="move_base/global_costmap/parameter_descriptions"				             to="$(arg namespace)/move_base/global_costmap/parameter_descriptions" />
+    <remap from="move_base/global_costmap/parameter_updates"				                 to="$(arg namespace)/move_base/global_costmap/parameter_updates" />
+    <remap from="move_base/global_costmap/static_layer/parameter_descriptions"		   to="$(arg namespace)/move_base/global_costmap/static_layer/parameter_descriptions" />
+    <remap from="move_base/global_costmap/static_layer/parameter_updates"			       to="$(arg namespace)/move_base/global_costmap/static_layer/parameter_updates" />
+    <remap from="move_base/goal"				                                             to="$(arg namespace)/move_base/goal" />
+    <remap from="move_base/local_costmap/costmap"				                             to="$(arg namespace)/move_base/local_costmap/costmap" />
+    <remap from="move_base/local_costmap/costmap_updates"				                     to="$(arg namespace)/move_base/local_costmap/costmap_updates" />
+    <remap from="move_base/local_costmap/footprint"                                  to="$(arg namespace)/move_base/local_costmap/footprint" />
+    <remap from="move_base/local_costmap/inflation_layer/parameter_descriptions"	   to="$(arg namespace)/move_base/local_costmap/inflation_layer/parameter_descriptions" />
+    <remap from="move_base/local_costmap/inflation_layer/parameter_updates"			     to="$(arg namespace)/move_base/local_costmap/inflation_layer/parameter_updates" />
+    <remap from="move_base/local_costmap/obstacle_layer/parameter_descriptions"		   to="$(arg namespace)/move_base/local_costmap/obstacle_layer/parameter_descriptions" />
+    <remap from="move_base/local_costmap/obstacle_layer/parameter_updates"			     to="$(arg namespace)/move_base/local_costmap/obstacle_layer/parameter_updates" />
+    <remap from="move_base/local_costmap/parameter_descriptions"				             to="$(arg namespace)/move_base/local_costmap/parameter_descriptions" />
+    <remap from="move_base/local_costmap/parameter_updates"				                   to="$(arg namespace)/move_base/local_costmap/parameter_updates" />
+    <remap from="move_base/parameter_descriptions"				                           to="$(arg namespace)/move_base/parameter_descriptions" />
+    <remap from="move_base/parameter_updates"				                                 to="$(arg namespace)/move_base/parameter_updates" />
+    <remap from="move_base/recovery_status"				                                   to="$(arg namespace)/move_base/recovery_status" />
+    <remap from="move_base/result"				                                           to="$(arg namespace)/move_base/result" />
+    <remap from="move_base/status"				                                           to="$(arg namespace)/move_base/status" />
+  </node>
+
+  <!-- rviz -->
+  <group if="$(arg open_rviz)"> 
+    <node pkg="rviz" type="rviz" name="rviz" required="true"
+          args="-d $(find turtlebot3_navigation)/rviz/turtlebot3_navigation.rviz"/>
+  </group>
+</launch>
