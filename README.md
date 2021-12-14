@@ -5,4 +5,4 @@ Stage 1 (Python): Simulates a math based swarm manager in tkinter. It both has a
 
 Stage 2 (ROS1): Initialized and deploys n robots in a simulated gazebo environment. It contains scripts for autonomously navigating the swarm.
 
-Stage 3 (ROS1): (Currently not implemented) Deploys a swarm of real robots to follow the functions of stage 2.
+Stage 3 (ROS1): Deploys a swarm of real robots to follow the functions of stage 2.
