@@ -23,9 +23,9 @@
     <param name="local_costmap/robot_base_frame"  value="$(arg namespace)/base_footprint"/>
     <param name="DWAPlannerROS/global_frame_id"   value="$(arg namespace)/odom"/>
 
-    <remap from="cmd_vel"                                                            to="$(arg cmd_vel_topic)"/>
-    <remap from="odom"                                                               to="$(arg odom_topic)"/>
-    <remap from="scan"                                                               to="$(arg scan_topic)"/>
+    <remap from="cmd_vel"                                                            to="$(arg namespace)/cmd_vel"/>
+    <remap from="odom"                                                               to="$(arg namespace)/odom"/>
+    <remap from="scan"                                                               to="$(arg namespace)/scan"/>
     <remap from="map"                                                                to="map" />
     <remap from="base_scan"                                                          to="$(arg namespace)/base_scan"/>
     <remap from="move_base_simple/goal"				                                       to="$(arg namespace)/move_base_simple/goal" />
