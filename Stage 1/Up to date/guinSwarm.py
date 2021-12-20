@@ -201,6 +201,7 @@ def checkDistance(p, p1, distance):
     else:
         return False
 
+    
 # Calculate direction to nearest bot
 def checkDirection(targetCoord, robotCoord):
     xDist = targetCoord[0] - robotCoord[0]
