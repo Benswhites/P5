@@ -1,6 +1,6 @@
 # Tutorial: How to use this
 
-## Be advises - current errors exist when running on UNIX systems
+## Be advised - current errors exist when running on UNIX systems
 We have yet to discover how this problem persists. However, the code generates a flashing and unusable window, when run on MacOS and Ubuntu. 
 We are trying to fix these errors, but the code works on Windows. We kindly advise you to see the video instead, if errors persist. 
 
